@@ -1,0 +1,725 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Saut en hauteur — Planning coach</title>
+<script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+<script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+<script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#f5f5f0;color:#1a1a1a;font-size:15px}
+  :root{--ppg:#534AB7;--ppg-bg:#EEEDFE;--ppg-border:#AFA9EC;--ppg-text:#3C3489;
+    --ppo:#0F6E56;--ppo-bg:#E1F5EE;--ppo-border:#5DCAA5;--ppo-text:#085041;
+    --pps:#993C1D;--pps-bg:#FAECE7;--pps-border:#F0997B;--pps-text:#712B13;
+    --comp:#854F0B;--comp-bg:#FAEEDA;--comp-border:#FAC775;--comp-text:#633806;
+    --rest:#5F5E5A;--rest-bg:#F1EFE8;--rest-border:#D3D1C7;--rest-text:#444441;
+    --blue:#185FA5;--sidebar:220px}
+  .layout{display:flex;min-height:100vh}
+  .sidebar{width:var(--sidebar);background:#fff;border-right:1px solid #e5e5e0;display:flex;flex-direction:column;flex-shrink:0;position:sticky;top:0;height:100vh}
+  .logo{padding:20px 18px 16px;border-bottom:1px solid #e5e5e0}
+  .logo-title{font-size:15px;font-weight:600;color:#1a1a1a}
+  .logo-sub{font-size:11px;color:#888;margin-top:2px}
+  .nav-section{font-size:10px;font-weight:600;color:#aaa;letter-spacing:.06em;text-transform:uppercase;padding:14px 18px 4px}
+  .nav-item{display:flex;align-items:center;gap:10px;padding:10px 18px;font-size:14px;color:#666;cursor:pointer;border-left:3px solid transparent;transition:all .15s}
+  .nav-item:hover{background:#f8f8f5;color:#1a1a1a}
+  .nav-item.active{color:var(--blue);background:#EEF5FC;border-left-color:var(--blue);font-weight:500}
+  .nav-icon{width:16px;height:16px;flex-shrink:0}
+  .main{flex:1;padding:28px 32px;overflow-y:auto;max-width:1100px}
+  .page-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:24px}
+  .page-title{font-size:22px;font-weight:600;color:#1a1a1a}
+  .btn{padding:9px 18px;border-radius:8px;font-size:14px;cursor:pointer;border:1px solid #ddd;background:#fff;color:#444;transition:all .15s}
+  .btn:hover{background:#f5f5f0;border-color:#bbb}
+  .btn-primary{background:var(--blue);color:#fff;border-color:var(--blue)}
+  .btn-primary:hover{background:#0d4d8a}
+  .btn-danger{color:#c0392b;border-color:#f0c0bb}
+  .btn-danger:hover{background:#fff5f5}
+  .card{background:#fff;border:1px solid #e5e5e0;border-radius:12px;padding:20px 24px;margin-bottom:14px}
+  .badge{display:inline-block;font-size:11px;font-weight:600;padding:3px 10px;border-radius:99px}
+  .b-ppg{background:var(--ppg-bg);color:var(--ppg-text)}
+  .b-ppo{background:var(--ppo-bg);color:var(--ppo-text)}
+  .b-pps{background:var(--pps-bg);color:var(--pps-text)}
+  .b-comp{background:var(--comp-bg);color:var(--comp-text)}
+  .b-rest{background:var(--rest-bg);color:var(--rest-text)}
+  .stat-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:20px}
+  .stat{background:#fff;border:1px solid #e5e5e0;border-radius:10px;padding:14px;text-align:center}
+  .stat-val{font-size:24px;font-weight:600;color:#1a1a1a}
+  .stat-lbl{font-size:11px;color:#888;margin-top:3px}
+  .athlete-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:12px}
+  .athlete-card{background:#fff;border:1px solid #e5e5e0;border-radius:12px;padding:20px;cursor:pointer;text-align:center;transition:all .15s}
+  .athlete-card:hover{border-color:#bbb;transform:translateY(-1px)}
+  .athlete-card.active{border:2px solid var(--blue);background:#EEF5FC}
+  .avatar{width:56px;height:56px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:600;font-size:18px;margin:0 auto 12px}
+  .av-blue{background:#E6F1FB;color:#0C447C}
+  .av-coral{background:#FAECE7;color:#712B13}
+  .av-teal{background:#E1F5EE;color:#085041}
+  .av-purple{background:#EEEDFE;color:#3C3489}
+  .profile-layout{display:grid;grid-template-columns:260px 1fr;gap:16px}
+  .section-label{font-size:11px;font-weight:600;color:#888;letter-spacing:.05em;text-transform:uppercase;margin-bottom:10px}
+  .info-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:16px}
+  .info-box{background:#f8f8f5;border-radius:8px;padding:10px 14px}
+  .info-lbl{font-size:11px;color:#888;margin-bottom:3px}
+  .info-val{font-size:15px;font-weight:600;color:#1a1a1a}
+  .pr-row{display:flex;justify-content:space-between;align-items:center;padding:10px 14px;background:#f8f8f5;border-radius:8px;margin-bottom:6px}
+  .pr-val{font-size:14px;font-weight:600;color:var(--blue)}
+  .tabs{display:flex;gap:2px;margin-bottom:20px;border-bottom:1px solid #e5e5e0}
+  .tab{padding:10px 18px;font-size:14px;color:#888;cursor:pointer;border:none;background:transparent;border-bottom:2px solid transparent;margin-bottom:-1px;transition:all .15s}
+  .tab:hover{color:#444}
+  .tab.active{color:var(--blue);border-bottom-color:var(--blue);font-weight:500}
+  .week-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:6px}
+  .day-hdr{text-align:center;font-size:11px;color:#888;padding:6px 0;font-weight:500}
+  .day-cell{border-radius:10px;min-height:72px;padding:8px;border:1px solid #e5e5e0;cursor:pointer;background:#fff;transition:all .15s}
+  .day-cell:hover{border-color:#bbb}
+  .day-cell.dc-ppg{background:var(--ppg-bg);border-color:var(--ppg-border)}
+  .day-cell.dc-ppo{background:var(--ppo-bg);border-color:var(--ppo-border)}
+  .day-cell.dc-pps{background:var(--pps-bg);border-color:var(--pps-border)}
+  .day-cell.dc-comp{background:var(--comp-bg);border-color:var(--comp-border)}
+  .day-cell.dc-rest{background:var(--rest-bg);border-color:var(--rest-border)}
+  .day-cell.empty{background:transparent;border-color:transparent;cursor:default}
+  .day-num{font-size:13px;font-weight:600}
+  .dc-ppg .day-num{color:var(--ppg-text)} .dc-ppo .day-num{color:var(--ppo-text)} .dc-pps .day-num{color:var(--pps-text)} .dc-comp .day-num{color:var(--comp-text)} .dc-rest .day-num{color:var(--rest-text)}
+  .day-tag{font-size:10px;font-weight:600;margin-top:3px}
+  .dc-ppg .day-tag{color:var(--ppg)} .dc-ppo .day-tag{color:var(--ppo)} .dc-pps .day-tag{color:var(--pps)} .dc-comp .day-tag{color:var(--comp)} .dc-rest .day-tag{color:var(--rest)}
+  .dot{width:6px;height:6px;border-radius:50%;margin:5px auto 0}
+  .dc-ppg .dot{background:var(--ppg)} .dc-ppo .dot{background:var(--ppo)} .dc-pps .dot{background:var(--pps)} .dc-comp .dot{background:var(--comp)}
+  .session-row{display:flex;align-items:center;gap:14px;padding:14px 18px;background:#fff;border:1px solid #e5e5e0;border-radius:10px;cursor:pointer;margin-bottom:8px;transition:all .15s}
+  .session-row:hover{border-color:#bbb;background:#fafaf8}
+  .s-date{font-size:12px;color:#888;min-width:80px}
+  .s-title{font-size:14px;font-weight:500;flex:1}
+  .back-btn{display:flex;align-items:center;gap:6px;background:transparent;border:none;color:var(--blue);font-size:14px;cursor:pointer;padding:0;margin-bottom:16px;font-weight:500}
+  .ex-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:12px;margin-top:12px}
+  .ex-card{background:#fff;border:1px solid #e5e5e0;border-radius:12px;overflow:hidden}
+  .ex-media{width:100%;height:120px;background:#f5f5f0;display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden;cursor:pointer}
+  .ex-media img{width:100%;height:100%;object-fit:cover}
+  .ex-ph{display:flex;flex-direction:column;align-items:center;gap:6px;color:#aaa;font-size:12px}
+  .vid-badge{position:absolute;top:6px;right:6px;background:rgba(0,0,0,.55);color:#fff;font-size:10px;padding:2px 8px;border-radius:99px}
+  .ex-body{padding:12px 14px}
+  .ex-name{font-size:13px;font-weight:600}
+  .ex-detail{font-size:11px;color:#888;margin-top:3px}
+  .stats-3{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:16px}
+  .phase-bar{display:flex;height:8px;border-radius:99px;overflow:hidden;margin-bottom:20px;gap:1px}
+  .phase-seg{height:100%;border-radius:99px}
+  .month-block{background:#fff;border:1px solid #e5e5e0;border-radius:12px;padding:20px 24px;margin-bottom:14px}
+  .month-title{font-size:15px;font-weight:600;color:#1a1a1a;margin-bottom:14px;display:flex;justify-content:space-between;align-items:center;cursor:pointer;user-select:none}
+  .cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:4px}
+  .cal-hdr{text-align:center;font-size:11px;color:#888;padding:5px 0;font-weight:500}
+  .cal-day{border-radius:8px;min-height:52px;padding:6px;border:1px solid #e5e5e0;cursor:pointer;background:#fff;transition:all .15s}
+  .cal-day:hover{border-color:#bbb}
+  .cal-day.dc-ppg{background:var(--ppg-bg);border-color:var(--ppg-border)}
+  .cal-day.dc-ppo{background:var(--ppo-bg);border-color:var(--ppo-border)}
+  .cal-day.dc-pps{background:var(--pps-bg);border-color:var(--pps-border)}
+  .cal-day.dc-comp{background:var(--comp-bg);border-color:var(--comp-border)}
+  .cal-day.dc-rest{background:var(--rest-bg);border-color:var(--rest-border)}
+  .cal-day.empty{background:transparent;border-color:transparent;cursor:default}
+  .today-ring{outline:2px solid var(--blue);outline-offset:1px}
+  .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.45);display:flex;align-items:center;justify-content:center;z-index:1000;padding:20px}
+  .modal{background:#fff;border-radius:16px;padding:28px;width:100%;max-width:440px;max-height:90vh;overflow-y:auto}
+  .modal-title{font-size:17px;font-weight:600;margin-bottom:20px}
+  .fg{margin-bottom:14px}
+  .fg label{font-size:12px;color:#666;display:block;margin-bottom:5px;font-weight:500}
+  .fg input,.fg select,.fg textarea{width:100%;padding:9px 12px;border:1px solid #ddd;border-radius:8px;font-size:14px;color:#1a1a1a;background:#fff;outline:none;transition:border .15s}
+  .fg input:focus,.fg select:focus,.fg textarea:focus{border-color:var(--blue)}
+  .fg textarea{resize:vertical;min-height:70px;font-family:inherit}
+  .fg-row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  .btn-row{display:flex;gap:10px;margin-top:6px}
+  .upload-zone{border:1.5px dashed #ddd;border-radius:8px;padding:16px;text-align:center;cursor:pointer;font-size:13px;color:#888;transition:all .15s}
+  .upload-zone:hover{background:#f8f8f5;border-color:#bbb}
+  .img-preview{width:100%;height:100px;object-fit:cover;border-radius:8px;margin-top:8px}
+  .legend{display:flex;gap:8px;flex-wrap:wrap}
+  @media(max-width:768px){
+    .sidebar{width:64px}
+    .logo-title,.logo-sub,.nav-section,.nav-item span{display:none}
+    .nav-item{justify-content:center;padding:14px}
+    .main{padding:20px 16px}
+    .stat-grid{grid-template-columns:repeat(2,1fr)}
+    .profile-layout{grid-template-columns:1fr}
+    .week-grid{grid-template-columns:repeat(7,1fr);gap:3px}
+    .ex-grid{grid-template-columns:repeat(auto-fill,minmax(150px,1fr))}
+  }
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script type="text/babel">
+const {useState, useCallback} = React;
+
+const JOURS = ['Lun','Mar','Mer','Jeu','Ven','Sam','Dim'];
+const AV_COLORS = ['av-blue','av-coral','av-teal','av-purple'];
+const PHASES = {
+  ppg:{label:'PPG',cls:'dc-ppg',badge:'b-ppg',color:'#534AB7'},
+  ppo:{label:'PPO',cls:'dc-ppo',badge:'b-ppo',color:'#0F6E56'},
+  pps:{label:'PPS',cls:'dc-pps',badge:'b-pps',color:'#993C1D'},
+  comp:{label:'Compét',cls:'dc-comp',badge:'b-comp',color:'#854F0B'},
+  rest:{label:'Repos',cls:'dc-rest',badge:'b-rest',color:'#888780'},
+  '':{label:'—',cls:'',badge:'',color:'#ddd'},
+};
+
+const WEEK_PLAN = [
+  {phase:'ppg',sessions:[1,3,5],notes:'Force générale, mobilité'},
+  {phase:'ppg',sessions:[1,3,5],notes:'Squat, fentes, gainage'},
+  {phase:'ppg',sessions:[1,3,6],notes:'Plyométrie légère'},
+  {phase:'ppg',sessions:[1,3,5],notes:'Transition PPG→PPO'},
+  {phase:'ppo',sessions:[1,3,5],notes:'Sauts en boîte'},
+  {phase:'ppo',sessions:[1,3,5],notes:'Force orientée'},
+  {phase:'ppo',sessions:[2,4,6],notes:'Appui technique Fosbury'},
+  {phase:'rest',sessions:[],notes:'Récupération active'},
+  {phase:'ppo',sessions:[1,3,5],notes:'PPO + intro PPS'},
+  {phase:'pps',sessions:[1,3,5,6],notes:'Approche, impulsion'},
+  {phase:'pps',sessions:[1,3,5,6],notes:'Approche complète'},
+  {phase:'pps',sessions:[1,3,5,6],notes:'Essais progressifs'},
+  {phase:'pps',sessions:[1,3,5],notes:'Affinage technique'},
+  {phase:'comp',sessions:[3,6],notes:'Compétition + récup'},
+  {phase:'pps',sessions:[1,3,5],notes:'Retour post-compét'},
+  {phase:'comp',sessions:[6],notes:'Compétition principale'},
+  {phase:'rest',sessions:[],notes:'Repos, bilan saison'},
+];
+
+function isoDate(d){return d.toISOString().split('T')[0];}
+function addDays(d,n){const r=new Date(d);r.setDate(r.getDate()+n);return r;}
+function mondayOf(date){const d=new Date(date);const day=d.getDay();d.setDate(d.getDate()+(day===0?-6:1-day));return d;}
+function calcAge(dob){const d=new Date(dob),n=new Date();let a=n.getFullYear()-d.getFullYear();if(n<new Date(n.getFullYear(),d.getMonth(),d.getDate()))a--;return a;}
+function initials(p,n){return(p[0]+n[0]).toUpperCase();}
+
+const TODAY = isoDate(new Date());
+const CAL_START = new Date('2026-04-20');
+
+function buildDayData(){
+  const data = {};
+  let mon = mondayOf(CAL_START);
+  WEEK_PLAN.forEach((wp,wi)=>{
+    for(let d=0;d<7;d++){
+      const date = addDays(mon, wi*7+d);
+      const iso = isoDate(date);
+      data[iso] = {phase:wp.phase, hasSession:wp.sessions.includes(d+1), notes:wp.notes, weekIdx:wi};
+    }
+  });
+  return data;
+}
+
+function SvgIcon({n}){
+  const icons = {
+    users:<svg className="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><circle cx="9" cy="7" r="3"/><path d="M3 21v-2a4 4 0 014-4h4a4 4 0 014 4v2"/><path d="M16 3.13a4 4 0 010 7.75"/><path d="M21 21v-2a4 4 0 00-3-3.87"/></svg>,
+    calendar:<svg className="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>,
+    grid:<svg className="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>,
+    cal2:<svg className="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="3" y1="10" x2="21" y2="10"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="16" y1="2" x2="16" y2="6"/></svg>,
+    plus:<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" style={{width:14,height:14}}><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>,
+    back:<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" style={{width:14,height:14}}><polyline points="15,18 9,12 15,6"/></svg>,
+    img:<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" style={{width:24,height:24}}><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21,15 16,10 5,21"/></svg>,
+    play:<svg viewBox="0 0 24 24" fill="none" stroke="#185FA5" strokeWidth="1.5" style={{width:28,height:28}}><circle cx="12" cy="12" r="10"/><polygon points="10,8 16,12 10,16" fill="#185FA5" stroke="none"/></svg>,
+  };
+  return icons[n]||null;
+}
+
+function Modal({title, onClose, children}){
+  return <div className="modal-overlay" onClick={e=>e.target===e.currentTarget&&onClose()}>
+    <div className="modal">
+      <div className="modal-title">{title}</div>
+      {children}
+    </div>
+  </div>;
+}
+
+function PhaseBadge({phase}){
+  const p = PHASES[phase]||PHASES[''];
+  return <span className={`badge ${p.badge}`}>{p.label}</span>;
+}
+
+function PhaseBar({dayData}){
+  const days = Object.keys(dayData).sort();
+  return <div className="phase-bar">
+    {days.map(iso=>{
+      const d = dayData[iso];
+      const col = d ? (PHASES[d.phase]?.color||'#ddd') : '#ddd';
+      return <div key={iso} className="phase-seg" style={{flex:1,background:col}}/>;
+    })}
+  </div>;
+}
+
+// ── MEMBRES ──────────────────────────────────────────────────────
+function Membres(){
+  const [athletes, setAthletes] = useState([
+    {id:1,prenom:'Lucas',nom:'Martin',dob:'2005-03-14',color:'av-blue',prs:[{label:'Meilleur saut',val:'1m85'},{label:'Concours officiel',val:'1m82'}]},
+    {id:2,prenom:'Emma',nom:'Dubois',dob:'2006-07-22',color:'av-coral',prs:[{label:'Meilleur saut',val:'1m55'},{label:'Concours officiel',val:'1m53'}]},
+    {id:3,prenom:'Nathan',nom:'Leroy',dob:'2004-11-09',color:'av-teal',prs:[{label:'Meilleur saut',val:'1m90'},{label:'Concours officiel',val:'1m88'}]},
+  ]);
+  const [selected, setSelected] = useState(1);
+  const [modal, setModal] = useState(null);
+  const [form, setForm] = useState({prenom:'',nom:'',dob:'',prs:[{label:'Meilleur saut',val:''}]});
+  const [nextId, setNextId] = useState(4);
+
+  const at = athletes.find(a=>a.id===selected);
+
+  function openNew(){
+    setForm({prenom:'',nom:'',dob:'',prs:[{label:'Meilleur saut',val:''}]});
+    setModal('new');
+  }
+  function openEdit(){
+    setForm({...at, prs:[...at.prs.map(p=>({...p}))]});
+    setModal('edit');
+  }
+  function saveNew(){
+    if(!form.prenom||!form.nom||!form.dob) return;
+    const color = AV_COLORS[nextId%AV_COLORS.length];
+    const newAt = {...form, id:nextId, color, prs:form.prs.filter(p=>p.label&&p.val)};
+    setAthletes(prev=>[...prev, newAt]);
+    setSelected(nextId);
+    setNextId(n=>n+1);
+    setModal(null);
+  }
+  function saveEdit(){
+    setAthletes(prev=>prev.map(a=>a.id===selected?{...form,id:selected,color:a.color,prs:form.prs.filter(p=>p.label&&p.val)}:a));
+    setModal(null);
+  }
+  function deleteAthlete(){
+    setAthletes(prev=>prev.filter(a=>a.id!==selected));
+    setSelected(athletes.find(a=>a.id!==selected)?.id||null);
+    setModal(null);
+  }
+  function updatePr(i,field,val){
+    setForm(f=>({...f,prs:f.prs.map((p,idx)=>idx===i?{...p,[field]:val}:p)}));
+  }
+
+  return <div>
+    <div className="page-header">
+      <div className="page-title">Membres</div>
+      <button className="btn btn-primary" onClick={openNew}><SvgIcon n="plus"/> Ajouter</button>
+    </div>
+    <div className="profile-layout">
+      <div>
+        <div className="section-label" style={{marginBottom:10}}>Groupe ({athletes.length})</div>
+        <div style={{display:'flex',flexDirection:'column',gap:8}}>
+          {athletes.map(a=><div key={a.id} className={`athlete-card ${a.id===selected?'active':''}`} onClick={()=>setSelected(a.id)}>
+            <div className={`avatar ${a.color}`} style={{width:44,height:44,fontSize:15}}>{initials(a.prenom,a.nom)}</div>
+            <div style={{fontSize:14,fontWeight:500}}>{a.prenom} {a.nom}</div>
+            <div style={{fontSize:12,color:'#888',marginTop:2}}>{calcAge(a.dob)} ans</div>
+          </div>)}
+        </div>
+      </div>
+      {at && <div className="card">
+        <div style={{display:'flex',alignItems:'center',gap:14,marginBottom:16,borderBottom:'1px solid #f0f0eb',paddingBottom:16}}>
+          <div className={`avatar ${at.color}`} style={{width:60,height:60,fontSize:20,flexShrink:0}}>{initials(at.prenom,at.nom)}</div>
+          <div style={{flex:1}}>
+            <div style={{fontSize:18,fontWeight:600}}>{at.prenom} {at.nom}</div>
+            <div style={{fontSize:13,color:'#888',marginTop:3}}>{calcAge(at.dob)} ans · né(e) le {new Date(at.dob+'T12:00:00').toLocaleDateString('fr-BE',{day:'2-digit',month:'long',year:'numeric'})}</div>
+          </div>
+          <button className="btn" onClick={openEdit}>Modifier</button>
+        </div>
+        <div className="section-label">Informations</div>
+        <div className="info-grid">
+          <div className="info-box"><div className="info-lbl">Âge</div><div className="info-val">{calcAge(at.dob)} ans</div></div>
+          <div className="info-box"><div className="info-lbl">Discipline</div><div className="info-val" style={{fontSize:13}}>Saut en hauteur</div></div>
+        </div>
+        <div className="section-label">Records personnels</div>
+        {at.prs.map((p,i)=><div key={i} className="pr-row">
+          <span style={{fontSize:13}}>{p.label}</span>
+          <span className="pr-val">{p.val}</span>
+        </div>)}
+      </div>}
+    </div>
+
+    {modal && <Modal title={modal==='new'?'Nouvel athlète':`Modifier ${at?.prenom} ${at?.nom}`} onClose={()=>setModal(null)}>
+      <div className="fg-row">
+        <div className="fg"><label>Prénom</label><input value={form.prenom} onChange={e=>setForm(f=>({...f,prenom:e.target.value}))} placeholder="Prénom"/></div>
+        <div className="fg"><label>Nom</label><input value={form.nom} onChange={e=>setForm(f=>({...f,nom:e.target.value}))} placeholder="Nom"/></div>
+      </div>
+      <div className="fg"><label>Date de naissance</label><input type="date" value={form.dob} onChange={e=>setForm(f=>({...f,dob:e.target.value}))}/></div>
+      <div className="fg">
+        <label>Records personnels</label>
+        {form.prs.map((p,i)=><div key={i} className="fg-row" style={{marginBottom:8}}>
+          <input value={p.label} onChange={e=>updatePr(i,'label',e.target.value)} placeholder="Label"/>
+          <input value={p.val} onChange={e=>updatePr(i,'val',e.target.value)} placeholder="1m80"/>
+        </div>)}
+        <button className="btn" style={{width:'100%',marginTop:4}} onClick={()=>setForm(f=>({...f,prs:[...f.prs,{label:'',val:''}]}))}>+ Record</button>
+      </div>
+      <div className="btn-row">
+        {modal==='edit' && <button className="btn btn-danger" onClick={deleteAthlete}>Supprimer</button>}
+        <button className="btn" style={{flex:1}} onClick={()=>setModal(null)}>Annuler</button>
+        <button className="btn btn-primary" style={{flex:1}} onClick={modal==='new'?saveNew:saveEdit}>Enregistrer</button>
+      </div>
+    </Modal>}
+  </div>;
+}
+
+// ── SÉANCES ──────────────────────────────────────────────────────
+function Seances(){
+  const [sessions, setSessions] = useState([
+    {id:1,date:'2026-04-21',title:'PPG — Renforcement général',phase:'ppg',notes:'Force de base.',exercises:[
+      {id:1,name:'Squat',sets:4,reps:'8',notes:'70% 1RM',videoUrl:'https://youtube.com',img:''},
+      {id:2,name:'Fentes marchées',sets:3,reps:'12/jambe',notes:'',videoUrl:'',img:''},
+      {id:3,name:'Gainage latéral',sets:3,reps:'30s',notes:'',videoUrl:'',img:''},
+    ]},
+    {id:2,date:'2026-04-23',title:'PPO — Force orientée',phase:'ppo',notes:'Transition vers spécifique.',exercises:[
+      {id:4,name:'Sauts en boîte',sets:4,reps:'6',notes:'Box 60cm',videoUrl:'https://youtube.com',img:''},
+      {id:5,name:'Foulées bondissantes',sets:3,reps:'20m',notes:'',videoUrl:'',img:''},
+    ]},
+    {id:3,date:'2026-04-26',title:'PPS — Spécifique hauteur',phase:'pps',notes:'Approche + impulsion.',exercises:[
+      {id:6,name:'Fosbury approche courte',sets:5,reps:'3 sauts',notes:'Barre 1m70',videoUrl:'https://youtube.com',img:''},
+      {id:7,name:'Impulsion sur haie',sets:4,reps:'8',notes:'',videoUrl:'',img:''},
+    ]},
+  ]);
+  const [tab, setTab] = useState('calendrier');
+  const [selSession, setSelSession] = useState(null);
+  const [modal, setModal] = useState(null);
+  const [form, setForm] = useState({date:'',title:'',phase:'ppg',notes:''});
+  const [exForm, setExForm] = useState({name:'',sets:'3',reps:'',notes:'',videoUrl:''});
+  const [exImg, setExImg] = useState('');
+  const [nextSId, setNextSId] = useState(4);
+  const [nextExId, setNextExId] = useState(8);
+  const [uploadedImgs, setUploadedImgs] = useState({});
+
+  const s = sessions.find(x=>x.id===selSession);
+
+  function saveSession(){
+    if(!form.title) return;
+    setSessions(prev=>[...prev,{id:nextSId,date:form.date||'2026-04-21',title:form.title,phase:form.phase,notes:form.notes,exercises:[]}]);
+    setNextSId(n=>n+1);
+    setModal(null);
+  }
+  function saveEx(){
+    if(!exForm.name||!s) return;
+    const exId = nextExId;
+    setSessions(prev=>prev.map(x=>x.id===selSession?{...x,exercises:[...x.exercises,{id:exId,name:exForm.name,sets:parseInt(exForm.sets)||3,reps:exForm.reps||'8',notes:exForm.notes,videoUrl:exForm.videoUrl,img:''}]}:x));
+    if(exImg) setUploadedImgs(prev=>({...prev,[exId]:exImg}));
+    setNextExId(n=>n+1);
+    setExImg('');
+    setModal(null);
+  }
+  function handleImg(e, exId){
+    const file = e.target.files[0];
+    if(!file) return;
+    const r = new FileReader();
+    r.onload = ev => setUploadedImgs(prev=>({...prev,[exId]:ev.target.result}));
+    r.readAsDataURL(file);
+  }
+
+  const dates = Array.from({length:7},(_,i)=>addDays(new Date('2026-04-21'),i));
+
+  if(selSession && s){
+    return <div>
+      <button className="back-btn" onClick={()=>setSelSession(null)}><SvgIcon n="back"/> Retour aux séances</button>
+      <div className="card">
+        <div style={{display:'flex',alignItems:'flex-start',justifyContent:'space-between',marginBottom:16}}>
+          <div>
+            <div style={{fontSize:19,fontWeight:600,marginBottom:6}}>{s.title}</div>
+            <div style={{fontSize:13,color:'#888',display:'flex',alignItems:'center',gap:8}}>
+              {new Date(s.date+'T12:00:00').toLocaleDateString('fr-BE',{weekday:'long',day:'numeric',month:'long'})}
+              <PhaseBadge phase={s.phase}/>
+            </div>
+          </div>
+          <button className="btn btn-primary" onClick={()=>{setExForm({name:'',sets:'3',reps:'',notes:'',videoUrl:''});setExImg('');setModal('newEx');}}>+ Exercice</button>
+        </div>
+        <div className="stats-3">
+          <div className="stat"><div className="stat-val">{s.exercises.length}</div><div className="stat-lbl">Exercices</div></div>
+          <div className="stat"><div className="stat-val">{s.exercises.reduce((a,e)=>a+e.sets,0)}</div><div className="stat-lbl">Séries tot.</div></div>
+          <div className="stat"><div className="stat-val">{s.exercises.filter(e=>e.videoUrl).length}</div><div className="stat-lbl">Vidéos</div></div>
+        </div>
+        {s.notes && <div style={{fontSize:13,color:'#666',padding:'10px 14px',background:'#f8f8f5',borderRadius:8,marginBottom:16}}>{s.notes}</div>}
+        <div className="section-label">Exercices</div>
+        <div className="ex-grid">
+          {s.exercises.map(ex=>{
+            const img = uploadedImgs[ex.id];
+            return <div key={ex.id} className="ex-card">
+              <div className="ex-media">
+                {img ? <img src={img} alt={ex.name}/> : ex.videoUrl ?
+                  <div style={{display:'flex',flexDirection:'column',alignItems:'center',gap:4,background:'#EEF5FC',width:'100%',height:'100%',justifyContent:'center'}}>
+                    <SvgIcon n="play"/><span style={{fontSize:11,color:'#185FA5'}}>Vidéo liée</span>
+                  </div> :
+                  <label style={{width:'100%',height:'100%',display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',cursor:'pointer',gap:6}}>
+                    <SvgIcon n="img"/><span style={{fontSize:11,color:'#aaa'}}>Ajouter image</span>
+                    <input type="file" accept="image/*" style={{display:'none'}} onChange={e=>handleImg(e,ex.id)}/>
+                  </label>}
+                {ex.videoUrl && img && <span className="vid-badge">Vidéo</span>}
+              </div>
+              <div className="ex-body">
+                <div className="ex-name">{ex.name}</div>
+                <div className="ex-detail">{ex.sets} × {ex.reps}{ex.notes?' · '+ex.notes:''}</div>
+              </div>
+            </div>;
+          })}
+        </div>
+      </div>
+      {modal==='newEx' && <Modal title="Nouvel exercice" onClose={()=>setModal(null)}>
+        <div className="fg"><label>Nom de l'exercice</label><input value={exForm.name} onChange={e=>setExForm(f=>({...f,name:e.target.value}))} placeholder="ex: Squat"/></div>
+        <div className="fg-row">
+          <div className="fg"><label>Séries</label><input type="number" value={exForm.sets} onChange={e=>setExForm(f=>({...f,sets:e.target.value}))}/></div>
+          <div className="fg"><label>Reps</label><input value={exForm.reps} onChange={e=>setExForm(f=>({...f,reps:e.target.value}))} placeholder="8"/></div>
+        </div>
+        <div className="fg"><label>Notes</label><textarea value={exForm.notes} onChange={e=>setExForm(f=>({...f,notes:e.target.value}))}/></div>
+        <div className="fg"><label>Image</label>
+          <label className="upload-zone">Choisir une image<input type="file" accept="image/*" style={{display:'none'}} onChange={e=>{const r=new FileReader();r.onload=ev=>setExImg(ev.target.result);r.readAsDataURL(e.target.files[0]);}}/></label>
+          {exImg && <img src={exImg} className="img-preview" alt="preview"/>}
+        </div>
+        <div className="fg"><label>URL vidéo (YouTube…)</label><input value={exForm.videoUrl} onChange={e=>setExForm(f=>({...f,videoUrl:e.target.value}))} placeholder="https://youtube.com/..."/></div>
+        <div className="btn-row">
+          <button className="btn" style={{flex:1}} onClick={()=>setModal(null)}>Annuler</button>
+          <button className="btn btn-primary" style={{flex:1}} onClick={saveEx}>Ajouter</button>
+        </div>
+      </Modal>}
+    </div>;
+  }
+
+  return <div>
+    <div className="page-header">
+      <div className="page-title">Séances</div>
+      <button className="btn btn-primary" onClick={()=>{setForm({date:'',title:'',phase:'ppg',notes:''});setModal('newSession');}}>+ Séance</button>
+    </div>
+    <div className="tabs">
+      <button className={`tab ${tab==='calendrier'?'active':''}`} onClick={()=>setTab('calendrier')}>Calendrier semaine</button>
+      <button className={`tab ${tab==='liste'?'active':''}`} onClick={()=>setTab('liste')}>Liste</button>
+    </div>
+    {tab==='calendrier' && <div className="card" style={{marginBottom:16}}>
+      <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:12}}>
+        <div className="section-label">Semaine du 21 avril 2026</div>
+        <div className="legend">{['ppg','ppo','pps','comp','rest'].map(p=><PhaseBadge key={p} phase={p}/>)}</div>
+      </div>
+      <div className="week-grid">
+        {JOURS.map(j=><div key={j} className="day-hdr">{j}</div>)}
+        {dates.map(d=>{
+          const iso = isoDate(d);
+          const s2 = sessions.find(x=>x.date===iso);
+          const pi = s2?PHASES[s2.phase]:null;
+          return <div key={iso} className={`day-cell ${pi?pi.cls:''}`} onClick={()=>s2&&setSelSession(s2.id)}>
+            <div className="day-num">{d.getDate()}</div>
+            {s2&&<><div className="day-tag">{pi.label}</div><div className="dot"/></>}
+          </div>;
+        })}
+      </div>
+    </div>}
+    <div className="card">
+      <div className="section-label" style={{marginBottom:12}}>Toutes les séances</div>
+      {[...sessions].sort((a,b)=>a.date.localeCompare(b.date)).map(s2=><div key={s2.id} className="session-row" onClick={()=>setSelSession(s2.id)}>
+        <div className="s-date">{new Date(s2.date+'T12:00:00').toLocaleDateString('fr-BE',{day:'2-digit',month:'short'})}</div>
+        <div className="s-title">{s2.title}</div>
+        <PhaseBadge phase={s2.phase}/>
+        <div style={{fontSize:12,color:'#888'}}>{s2.exercises.length} ex.</div>
+      </div>)}
+    </div>
+    {modal==='newSession' && <Modal title="Nouvelle séance" onClose={()=>setModal(null)}>
+      <div className="fg"><label>Date</label><input type="date" value={form.date} onChange={e=>setForm(f=>({...f,date:e.target.value}))}/></div>
+      <div className="fg"><label>Titre</label><input value={form.title} onChange={e=>setForm(f=>({...f,title:e.target.value}))} placeholder="ex: PPG force"/></div>
+      <div className="fg"><label>Phase</label><select value={form.phase} onChange={e=>setForm(f=>({...f,phase:e.target.value}))}>
+        <option value="ppg">PPG — Préparation générale</option>
+        <option value="ppo">PPO — Préparation orientée</option>
+        <option value="pps">PPS — Préparation spécifique</option>
+        <option value="comp">Compétition</option>
+        <option value="rest">Repos</option>
+      </select></div>
+      <div className="fg"><label>Notes</label><textarea value={form.notes} onChange={e=>setForm(f=>({...f,notes:e.target.value}))}/></div>
+      <div className="btn-row">
+        <button className="btn" style={{flex:1}} onClick={()=>setModal(null)}>Annuler</button>
+        <button className="btn btn-primary" style={{flex:1}} onClick={saveSession}>Créer</button>
+      </div>
+    </Modal>}
+  </div>;
+}
+
+// ── PLANNING MACRO ────────────────────────────────────────────────
+function PlanningMacro(){
+  const [dayData, setDayData] = useState(buildDayData);
+  const [collapsed, setCollapsed] = useState({});
+  const [editWeek, setEditWeek] = useState(null);
+  const [form, setForm] = useState({phase:'ppg',notes:''});
+
+  const weeks = [];
+  let mon = mondayOf(CAL_START);
+  for(let wi=0;wi<WEEK_PLAN.length;wi++){
+    weeks.push({id:isoDate(mon),wn:wi+1,mon:new Date(mon),sun:addDays(mon,6)});
+    mon = addDays(mon,7);
+  }
+  const months = [];let cur=null;
+  weeks.forEach(w=>{
+    const m=w.mon.getMonth(),y=w.mon.getFullYear(),key=`${y}-${m}`;
+    if(!cur||cur.key!==key){cur={key,label:w.mon.toLocaleDateString('fr-BE',{month:'long',year:'numeric'}),weeks:[]};months.push(cur);}
+    cur.weeks.push(w);
+  });
+
+  const c={ppg:0,ppo:0,pps:0,comp:0,rest:0};
+  const seen=new Set();
+  Object.values(dayData).forEach(d=>{if(!seen.has(d.weekIdx)){seen.add(d.weekIdx);if(c[d.phase]!==undefined)c[d.phase]++;}});
+
+  function openEditWeek(iso){
+    const d = dayData[iso]||{phase:'ppg',notes:''};
+    setForm({phase:d.phase,notes:d.notes});
+    setEditWeek(iso);
+  }
+  function saveWeek(){
+    const wi = dayData[editWeek]?.weekIdx;
+    if(wi===undefined){setEditWeek(null);return;}
+    setDayData(prev=>{
+      const next={...prev};
+      Object.keys(next).filter(k=>next[k].weekIdx===wi).forEach(k=>{next[k]={...next[k],phase:form.phase,notes:form.notes};});
+      return next;
+    });
+    setEditWeek(null);
+  }
+
+  return <div>
+    <div className="page-header"><div className="page-title">Planning macro — 4 mois</div></div>
+    <div className="stat-grid">
+      <div className="stat"><div className="stat-val">{weeks.length}</div><div className="stat-lbl">Semaines</div></div>
+      <div className="stat"><div className="stat-val" style={{color:'var(--ppg)'}}>{c.ppg}</div><div className="stat-lbl">PPG</div></div>
+      <div className="stat"><div className="stat-val" style={{color:'var(--ppo)'}}>{c.ppo}</div><div className="stat-lbl">PPO</div></div>
+      <div className="stat"><div className="stat-val" style={{color:'var(--pps)'}}>{c.pps}</div><div className="stat-lbl">PPS</div></div>
+    </div>
+    <PhaseBar dayData={dayData}/>
+    {months.map(m=>{
+      const open = !collapsed[m.key];
+      const phInMonth = ['ppg','ppo','pps','comp','rest'].filter(p=>m.weeks.some(w=>(dayData[w.id]||{}).phase===p));
+      return <div key={m.key} className="month-block">
+        <div className="month-title" onClick={()=>setCollapsed(prev=>({...prev,[m.key]:!prev[m.key]}))}>
+          <span>{m.label.charAt(0).toUpperCase()+m.label.slice(1)}</span>
+          <div style={{display:'flex',gap:6,alignItems:'center'}}>
+            {phInMonth.map(p=><PhaseBadge key={p} phase={p}/>)}
+            <span style={{fontSize:12,color:'#888',marginLeft:4}}>{open?'▲':'▼'}</span>
+          </div>
+        </div>
+        {open && <div className="cal-grid" style={{gridTemplateColumns:`repeat(${Math.min(m.weeks.length,4)},1fr)`}}>
+          {m.weeks.map(w=>{
+            const d = dayData[w.id]||{phase:'',notes:''};
+            const pi = PHASES[d.phase]||PHASES[''];
+            const sessCount = Object.keys(dayData).filter(k=>dayData[k].weekIdx===d.weekIdx&&dayData[k].hasSession).length;
+            return <div key={w.id} className={`cal-day ${pi.cls}`} onClick={()=>openEditWeek(w.id)} style={{minHeight:64}}>
+              <div style={{fontSize:10,color:'#888'}}>S{w.wn}</div>
+              <div style={{fontSize:13,fontWeight:600,color:pi.color||'#888',marginTop:2}}>{pi.label}</div>
+              {sessCount>0&&<div style={{fontSize:10,color:'#888',marginTop:2}}>{sessCount} jours</div>}
+            </div>;
+          })}
+        </div>}
+      </div>;
+    })}
+    {editWeek && <Modal title="Modifier la semaine" onClose={()=>setEditWeek(null)}>
+      <div className="fg"><label>Phase</label><select value={form.phase} onChange={e=>setForm(f=>({...f,phase:e.target.value}))}>
+        <option value="ppg">PPG — Préparation générale</option>
+        <option value="ppo">PPO — Préparation orientée</option>
+        <option value="pps">PPS — Préparation spécifique</option>
+        <option value="comp">Compétition</option>
+        <option value="rest">Repos / récupération</option>
+        <option value="">Non planifié</option>
+      </select></div>
+      <div className="fg"><label>Notes / objectifs</label><textarea value={form.notes} onChange={e=>setForm(f=>({...f,notes:e.target.value}))}/></div>
+      <div className="btn-row">
+        <button className="btn" style={{flex:1}} onClick={()=>setEditWeek(null)}>Annuler</button>
+        <button className="btn btn-primary" style={{flex:1}} onClick={saveWeek}>Enregistrer</button>
+      </div>
+    </Modal>}
+  </div>;
+}
+
+// ── CALENDRIER SAISON ─────────────────────────────────────────────
+function CalendrierSaison(){
+  const [dayData, setDayData] = useState(buildDayData);
+  const [editDay, setEditDay] = useState(null);
+  const [form, setForm] = useState({phase:'ppg',hasSession:false,notes:''});
+
+  const calMonths = [];let cur=null;
+  Object.keys(dayData).sort().forEach(iso=>{
+    const d=new Date(iso+'T12:00:00'),m=d.getMonth(),y=d.getFullYear(),key=`${y}-${m}`;
+    if(!cur||cur.key!==key){cur={key,year:y,month:m,label:d.toLocaleDateString('fr-BE',{month:'long',year:'numeric'})};calMonths.push(cur);}
+  });
+
+  const c={ppg:0,ppo:0,pps:0};const seen=new Set();
+  Object.values(dayData).forEach(d=>{if(!seen.has(d.weekIdx)){seen.add(d.weekIdx);if(c[d.phase]!==undefined)c[d.phase]++;}});
+
+  function openEdit(iso){
+    const d=dayData[iso];
+    setForm({phase:d.phase,hasSession:d.hasSession,notes:d.notes});
+    setEditDay(iso);
+  }
+  function saveDay(){
+    const wi=dayData[editDay].weekIdx;
+    setDayData(prev=>{
+      const next={...prev};
+      Object.keys(next).filter(k=>next[k].weekIdx===wi).forEach(k=>{next[k]={...next[k],phase:form.phase,notes:form.notes};});
+      next[editDay]={...next[editDay],hasSession:form.hasSession};
+      return next;
+    });
+    setEditDay(null);
+  }
+
+  return <div>
+    <div className="page-header">
+      <div className="page-title">Calendrier de saison</div>
+      <div className="legend">{['ppg','ppo','pps','comp','rest'].map(p=><PhaseBadge key={p} phase={p}/>)}</div>
+    </div>
+    <div className="stat-grid">
+      <div className="stat"><div className="stat-val">{WEEK_PLAN.length}</div><div className="stat-lbl">Semaines</div></div>
+      <div className="stat"><div className="stat-val" style={{color:'var(--ppg)'}}>{c.ppg}</div><div className="stat-lbl">PPG</div></div>
+      <div className="stat"><div className="stat-val" style={{color:'var(--ppo)'}}>{c.ppo}</div><div className="stat-lbl">PPO</div></div>
+      <div className="stat"><div className="stat-val" style={{color:'var(--pps)'}}>{c.pps}</div><div className="stat-lbl">PPS</div></div>
+    </div>
+    <PhaseBar dayData={dayData}/>
+    {calMonths.map(m=>{
+      const fd=new Date(m.year,m.month,1).getDay();
+      const offset=fd===0?6:fd-1;
+      const dim=new Date(m.year,m.month+1,0).getDate();
+      const cells=[];
+      for(let i=0;i<offset;i++) cells.push(<div key={`e${i}`} className="cal-day empty"/>);
+      for(let day=1;day<=dim;day++){
+        const date=new Date(m.year,m.month,day);
+        const iso=isoDate(date);
+        const dd=dayData[iso];
+        const pi=dd?PHASES[dd.phase]:null;
+        const isToday=iso===TODAY;
+        cells.push(<div key={iso} className={`cal-day ${pi?pi.cls:''} ${isToday?'today-ring':''}`} onClick={()=>dd&&openEdit(iso)} style={{minHeight:52}}>
+          <div style={{fontSize:12,fontWeight:600,color:pi?pi.color:'#bbb'}}>{day}</div>
+          {pi&&dd.phase&&<div style={{fontSize:10,fontWeight:600,color:pi.color,marginTop:2}}>{pi.label}</div>}
+          {dd&&dd.hasSession&&<div style={{width:6,height:6,borderRadius:'50%',background:pi?.color||'#aaa',margin:'4px auto 0'}}/>}
+        </div>);
+      }
+      return <div key={m.key} className="month-block">
+        <div className="month-title" style={{cursor:'default'}}>{m.label.charAt(0).toUpperCase()+m.label.slice(1)}</div>
+        <div className="cal-grid">
+          {JOURS.map(j=><div key={j} className="cal-hdr">{j}</div>)}
+          {cells}
+        </div>
+      </div>;
+    })}
+    {editDay && <Modal title={new Date(editDay+'T12:00:00').toLocaleDateString('fr-BE',{weekday:'long',day:'numeric',month:'long'})} onClose={()=>setEditDay(null)}>
+      <div className="fg"><label>Phase</label><select value={form.phase} onChange={e=>setForm(f=>({...f,phase:e.target.value}))}>
+        <option value="ppg">PPG</option><option value="ppo">PPO</option><option value="pps">PPS</option>
+        <option value="comp">Compétition</option><option value="rest">Repos</option><option value="">Non planifié</option>
+      </select></div>
+      <div className="fg"><label>Séance ce jour</label><select value={form.hasSession?'1':'0'} onChange={e=>setForm(f=>({...f,hasSession:e.target.value==='1'}))}>
+        <option value="1">Oui</option><option value="0">Non</option>
+      </select></div>
+      <div className="fg"><label>Notes</label><textarea value={form.notes} onChange={e=>setForm(f=>({...f,notes:e.target.value}))}/></div>
+      <div className="btn-row">
+        <button className="btn" style={{flex:1}} onClick={()=>setEditDay(null)}>Annuler</button>
+        <button className="btn btn-primary" style={{flex:1}} onClick={saveDay}>Enregistrer</button>
+      </div>
+    </Modal>}
+  </div>;
+}
+
+// ── APP ROOT ──────────────────────────────────────────────────────
+function App(){
+  const [page, setPage] = useState('membres');
+  const nav = (id,icon,label) => <div className={`nav-item ${page===id?'active':''}`} onClick={()=>setPage(id)}>
+    <SvgIcon n={icon}/><span>{label}</span>
+  </div>;
+
+  return <div className="layout">
+    <div className="sidebar">
+      <div className="logo"><div className="logo-title">Saut en hauteur</div><div className="logo-sub">Planning coach</div></div>
+      <div className="nav-section">Groupe</div>
+      {nav('membres','users','Membres')}
+      <div className="nav-section">Entraînement</div>
+      {nav('seances','calendar','Séances')}
+      <div className="nav-section">Saison</div>
+      {nav('planning','grid','Planning macro')}
+      {nav('calendrier','cal2','Calendrier saison')}
+    </div>
+    <div className="main">
+      {page==='membres' && <Membres/>}
+      {page==='seances' && <Seances/>}
+      {page==='planning' && <PlanningMacro/>}
+      {page==='calendrier' && <CalendrierSaison/>}
+    </div>
+  </div>;
+}
+
+ReactDOM.createRoot(document.getElementById('root')).render(<App/>);
+</script>
+</body>
+</html>
